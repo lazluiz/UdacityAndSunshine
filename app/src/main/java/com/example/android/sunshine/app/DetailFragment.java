@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.sunshine.app.data.WeatherContract;
+import com.example.android.sunshine.app.utils.ArtUtils;
 
 import java.util.Locale;
 
@@ -49,21 +50,23 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             WeatherContract.WeatherEntry.COLUMN_HUMIDITY,
             WeatherContract.WeatherEntry.COLUMN_WIND_SPEED,
             WeatherContract.WeatherEntry.COLUMN_DEGREES,
-            WeatherContract.WeatherEntry.COLUMN_PRESSURE
+            WeatherContract.WeatherEntry.COLUMN_PRESSURE,
+            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID
     };
 
     // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
     // must change.
     // Just some boilerplate code from Google
-    static final int COL_WEATHER_ID = 0;
-    static final int COL_WEATHER_DATE = 1;
-    static final int COL_WEATHER_DESC = 2;
-    static final int COL_WEATHER_MAX_TEMP = 3;
-    static final int COL_WEATHER_MIN_TEMP = 4;
-    static final int COL_WEATHER_HUMIDITY = 5;
-    static final int COL_WEATHER_WIND_SPEED = 6;
-    static final int COL_WEATHER_DEGREES = 7;
-    static final int COL_WEATHER_PRESSURE = 8;
+    private static final int COL_WEATHER_ID = 0;
+    private static final int COL_WEATHER_DATE = 1;
+    private static final int COL_WEATHER_DESC = 2;
+    private static final int COL_WEATHER_MAX_TEMP = 3;
+    private static final int COL_WEATHER_MIN_TEMP = 4;
+    private static final int COL_WEATHER_HUMIDITY = 5;
+    private static final int COL_WEATHER_WIND_SPEED = 6;
+    private static final int COL_WEATHER_DEGREES = 7;
+    private static final int COL_WEATHER_PRESSURE = 8;
+    private static final int COL_WEATHER_CONDITION_ID = 9;
 
     public DetailFragment() {
         setHasOptionsMenu(true);
@@ -144,45 +147,58 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             txtWind = (TextView) view.findViewById(R.id.wind_textview);
             txtPressure = (TextView) view.findViewById(R.id.pressure_textview);
         }
+
+        public static ViewHolder getInstance(View view) {
+
+            if (view.getTag() == null) {
+                view.setTag(new ViewHolder(view));
+            }
+
+            return (ViewHolder) view.getTag();
+        }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         View view = getView();
-        ViewHolder viewHolder;
 
-        if (!data.moveToFirst() || view == null) return;
+        // Check if there's data and make sure the view is not null - who knows?
+        if (data == null || !data.moveToFirst() || view == null) return;
 
-        if (view.getTag() == null) {
-            viewHolder = new ViewHolder(view);
-            view.setTag(viewHolder);
-        }
+        ViewHolder viewHolder = ViewHolder.getInstance(view);
 
-        viewHolder = (ViewHolder) view.getTag();
+        int cWeatherCondId = data.getInt(COL_WEATHER_CONDITION_ID);
+        long cWeatherDate = data.getLong(COL_WEATHER_DATE);
+        String cWeatherDesc = data.getString(COL_WEATHER_DESC);
+        double cWeatherMaxTemp = data.getDouble(COL_WEATHER_MAX_TEMP);
+        double cWeatherMinTemp = data.getDouble(COL_WEATHER_MIN_TEMP);
+        float cWeatherHumidity =  data.getFloat(COL_WEATHER_HUMIDITY);
+        float cWeatherWindSpeed = data.getFloat(COL_WEATHER_WIND_SPEED);
+        float cWeatherWindDirection = data.getFloat(COL_WEATHER_DEGREES);
+        float cWeatherPressure = data.getFloat(COL_WEATHER_PRESSURE);
 
-        viewHolder.txtDay.setText(Utility.getDayName(getActivity(), data.getLong(COL_WEATHER_DATE)));
-        viewHolder.txtDate.setText(Utility.getFormattedMonthDay(getActivity(), data.getLong(COL_WEATHER_DATE)));
+        // Weather Date
+        viewHolder.txtDay.setText(Utility.getDayName(getActivity(), cWeatherDate));
+        viewHolder.txtDate.setText(Utility.getFormattedMonthDay(getActivity(), cWeatherDate));
 
+        // Weather Temperatures
         Context c = getActivity();
         boolean isMetric = Utility.isMetric(c);
-        viewHolder.txtHighTemp.setText(Utility.formatTemperature(c, data.getDouble(COL_WEATHER_MAX_TEMP), isMetric));
-        viewHolder.txtLowTemp.setText(Utility.formatTemperature(c, data.getDouble(COL_WEATHER_MIN_TEMP), isMetric));
+        viewHolder.txtHighTemp.setText(Utility.formatTemperature(c, cWeatherMaxTemp, isMetric));
+        viewHolder.txtLowTemp.setText(Utility.formatTemperature(c, cWeatherMinTemp, isMetric));
 
-        viewHolder.imgForecast.setImageResource(R.mipmap.ic_launcher);
-        viewHolder.txtDescription.setText(data.getString(COL_WEATHER_DESC));
+        // Weather Image
+        viewHolder.imgForecast.setImageResource(ArtUtils.getArtResourceForWeatherCondition(cWeatherCondId));
 
-        viewHolder.txtHumidity.setText(Utility.getFormattedHumidity(c, data.getFloat(COL_WEATHER_HUMIDITY)));
-        viewHolder.txtWind.setText(Utility.getFormattedWind(c, data.getFloat(COL_WEATHER_WIND_SPEED), data.getFloat(COL_WEATHER_DEGREES)));
-        viewHolder.txtPressure.setText(Utility.getFormattedPressure(c, data.getFloat(COL_WEATHER_PRESSURE)));
+        // Weather Description
+        viewHolder.txtDescription.setText(cWeatherDesc);
 
-//            String dateString = Utility.formatDate(data.getLong(COL_WEATHER_DATE));
-//            String weatherDesc = data.getString(COL_WEATHER_DESC);
-//
-//            boolean isMetric = Utility.isMetric(getActivity());
-//
-//            String highTemp = Utility.formatTemperature(getActivity(), data.getDouble(COL_WEATHER_MAX_TEMP), isMetric);
-//            String lowTemp = Utility.formatTemperature(getActivity(), data.getDouble(COL_WEATHER_MIN_TEMP), isMetric);
+        // Weather Details
+        viewHolder.txtHumidity.setText(Utility.getFormattedHumidity(c, cWeatherHumidity));
+        viewHolder.txtWind.setText(Utility.getFormattedWind(c, cWeatherWindSpeed, cWeatherWindDirection));
+        viewHolder.txtPressure.setText(Utility.getFormattedPressure(c, cWeatherPressure));
 
+        // Sharing
         mForecast = String.format(Locale.getDefault(), "%s - %s - %s/%s",
                 viewHolder.txtDay.getText(),
                 viewHolder.txtDescription.getText(),

@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
+import com.example.android.sunshine.app.utils.ArtUtils;
 
 /**
  * {@link ForecastAdapter} exposes a list of weather forecasts
@@ -74,16 +74,31 @@ public class ForecastAdapter extends CursorAdapter {
      */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
-        viewHolder.iconView.setImageResource(R.mipmap.ic_launcher);
-        viewHolder.dateView.setText(Utility.getFriendlyDayString(mContext, cursor.getLong(ForecastFragment.COL_WEATHER_DATE)));
-        viewHolder.descriptionView.setText(cursor.getString(ForecastFragment.COL_WEATHER_DESC));
+        int cWeatherCondId = cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID);
+        long cWeatherDate = cursor.getLong(ForecastFragment.COL_WEATHER_DATE);
+        String cWeatherDesc = cursor.getString(ForecastFragment.COL_WEATHER_DESC);
+        double cWeatherMaxTemp = cursor.getDouble(ForecastFragment.COL_WEATHER_MAX_TEMP);
+        double cWeatherMinTemp = cursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP);
 
+        // Weather Icon
+        int viewType = getItemViewType(cursor.getPosition());
+        if(viewType == VIEW_TYPE_FUTURE_DAY){
+            viewHolder.iconView.setImageResource(ArtUtils.getIconResourceForWeatherCondition(cWeatherCondId));
+        }else if(viewType == VIEW_TYPE_TODAY){
+            viewHolder.iconView.setImageResource(ArtUtils.getArtResourceForWeatherCondition(cWeatherCondId));
+        }
+
+        // Weather Date
+        viewHolder.dateView.setText(Utility.getFriendlyDayString(mContext, cWeatherDate));
+
+        // Weather Description
+        viewHolder.descriptionView.setText(cWeatherDesc);
+
+        // Weather Temperatures
         boolean isMetric = Utility.isMetric(mContext);
-        viewHolder.highTempView.setText(Utility.formatTemperature(mContext, cursor.getDouble(ForecastFragment.COL_WEATHER_MAX_TEMP), isMetric));
-        viewHolder.lowTempView.setText(Utility.formatTemperature(mContext, cursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP), isMetric));
-
+        viewHolder.highTempView.setText(Utility.formatTemperature(mContext, cWeatherMaxTemp, isMetric));
+        viewHolder.lowTempView.setText(Utility.formatTemperature(mContext, cWeatherMinTemp, isMetric));
     }
 }
