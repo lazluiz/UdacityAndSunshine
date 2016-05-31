@@ -9,8 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.android.sunshine.app.utils.ArtUtils;
-
 /**
  * {@link ForecastAdapter} exposes a list of weather forecasts
  * from a {@link android.database.Cursor} to a {@link android.widget.ListView}.
@@ -21,13 +19,19 @@ public class ForecastAdapter extends CursorAdapter {
     private static final int VIEW_TYPE_FUTURE_DAY = 1;
     private static final int VIEW_TYPE_COUNT = 2;
 
+    private boolean mUseTodayLayout;
+
     public ForecastAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 
+    public void setUseTodayLayout(boolean useTodayLayout){
+        mUseTodayLayout = useTodayLayout;
+    }
+
     @Override
     public int getItemViewType(int position) {
-        return position == 0 ? VIEW_TYPE_TODAY : VIEW_TYPE_FUTURE_DAY;
+        return (position == 0 && mUseTodayLayout) ? VIEW_TYPE_TODAY : VIEW_TYPE_FUTURE_DAY;
     }
 
     @Override
@@ -85,20 +89,20 @@ public class ForecastAdapter extends CursorAdapter {
         // Weather Icon
         int viewType = getItemViewType(cursor.getPosition());
         if(viewType == VIEW_TYPE_FUTURE_DAY){
-            viewHolder.iconView.setImageResource(ArtUtils.getIconResourceForWeatherCondition(cWeatherCondId));
+            viewHolder.iconView.setImageResource(Utility.Art.getIconResourceForWeatherCondition(cWeatherCondId));
         }else if(viewType == VIEW_TYPE_TODAY){
-            viewHolder.iconView.setImageResource(ArtUtils.getArtResourceForWeatherCondition(cWeatherCondId));
+            viewHolder.iconView.setImageResource(Utility.Art.getArtResourceForWeatherCondition(cWeatherCondId));
         }
 
         // Weather Date
-        viewHolder.dateView.setText(Utility.getFriendlyDayString(mContext, cWeatherDate));
+        viewHolder.dateView.setText(Utility.Format.getFriendlyDayString(mContext, cWeatherDate));
 
         // Weather Description
         viewHolder.descriptionView.setText(cWeatherDesc);
 
         // Weather Temperatures
-        boolean isMetric = Utility.isMetric(mContext);
-        viewHolder.highTempView.setText(Utility.formatTemperature(mContext, cWeatherMaxTemp, isMetric));
-        viewHolder.lowTempView.setText(Utility.formatTemperature(mContext, cWeatherMinTemp, isMetric));
+        boolean isMetric = Utility.Settings.isMetric(mContext);
+        viewHolder.highTempView.setText(Utility.Format.formatTemperature(mContext, cWeatherMaxTemp, isMetric));
+        viewHolder.lowTempView.setText(Utility.Format.formatTemperature(mContext, cWeatherMinTemp, isMetric));
     }
 }

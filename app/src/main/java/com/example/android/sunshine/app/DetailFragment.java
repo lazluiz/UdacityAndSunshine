@@ -7,6 +7,7 @@ package com.example.android.sunshine.app;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -26,18 +27,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.sunshine.app.data.WeatherContract;
-import com.example.android.sunshine.app.utils.ArtUtils;
 
 import java.util.Locale;
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String LOG_TAG = DetailFragment.class.getSimpleName();
+    static final String DETAIL_URI = "URI";
 
+    private static final String LOG_TAG = DetailFragment.class.getSimpleName();
     private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
 
-    ShareActionProvider mShareActionProvider;
+    private ShareActionProvider mShareActionProvider;
     private String mForecast = "";
+    private Uri mUri;
 
     private static final int DETAIL_LOADER = 0;
 
@@ -68,13 +70,39 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final int COL_WEATHER_PRESSURE = 8;
     private static final int COL_WEATHER_CONDITION_ID = 9;
 
+    private ImageView mIconView;
+    private TextView mDateView;
+    private TextView mDayView;
+    private TextView mDescriptionView;
+    private TextView mHighTempView;
+    private TextView mLowTempView;
+    private TextView mHumidityView;
+    private TextView mWindView;
+    private TextView mPressureView;
+
     public DetailFragment() {
         setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_detail, container, false);
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mUri = arguments.getParcelable(DETAIL_URI);
+        }
+
+        View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+        mIconView = (ImageView) rootView.findViewById(R.id.detail_icon);
+        mDayView = (TextView) rootView.findViewById(R.id.detail_day_textview);
+        mDateView = (TextView) rootView.findViewById(R.id.detail_date_textview);
+        mDescriptionView = (TextView) rootView.findViewById(R.id.detail_desc_textview);
+        mHighTempView = (TextView) rootView.findViewById(R.id.detail_high_temperature_textview);
+        mLowTempView = (TextView) rootView.findViewById(R.id.detail_low_temperature_textview);
+        mHumidityView = (TextView) rootView.findViewById(R.id.detail_humidity_textview);
+        mWindView = (TextView) rootView.findViewById(R.id.detail_wind_textview);
+        mPressureView = (TextView) rootView.findViewById(R.id.detail_pressure_textview);
+
+        return rootView;
     }
 
     @Override
@@ -82,6 +110,88 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         super.onActivityCreated(savedInstanceState);
 
         getLoaderManager().initLoader(DETAIL_LOADER, savedInstanceState, this);
+    }
+
+    void onLocationSettingChanged(String newLocation) {
+        // replace the uri, since the location has changed
+        Uri uri = mUri;
+        if (uri != null) {
+            long date = WeatherContract.WeatherEntry.getDateFromUri(uri);
+            mUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(newLocation, date);
+            getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+        }
+    }
+
+    private Intent createShareForecastIntent() {
+        return new Intent(Intent.ACTION_SEND)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
+                .setType("text/plain")
+                .putExtra(Intent.EXTRA_TEXT, mForecast.concat(FORECAST_SHARE_HASHTAG));
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return mUri == null ? null : new CursorLoader(
+                getActivity(),
+                mUri,
+                FORECAST_COLUMNS,
+                null,
+                null,
+                null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        // Check if there's data
+        if (data != null && data.moveToFirst()) {
+
+            int cWeatherCondId = data.getInt(COL_WEATHER_CONDITION_ID);
+            long cWeatherDate = data.getLong(COL_WEATHER_DATE);
+            String cWeatherDesc = data.getString(COL_WEATHER_DESC);
+            double cWeatherMaxTemp = data.getDouble(COL_WEATHER_MAX_TEMP);
+            double cWeatherMinTemp = data.getDouble(COL_WEATHER_MIN_TEMP);
+            float cWeatherHumidity = data.getFloat(COL_WEATHER_HUMIDITY);
+            float cWeatherWindSpeed = data.getFloat(COL_WEATHER_WIND_SPEED);
+            float cWeatherWindDirection = data.getFloat(COL_WEATHER_DEGREES);
+            float cWeatherPressure = data.getFloat(COL_WEATHER_PRESSURE);
+
+            // Weather Date
+            mDayView.setText(Utility.Format.getDayName(getActivity(), cWeatherDate));
+            mDateView.setText(Utility.Format.getFormattedMonthDay(getActivity(), cWeatherDate));
+
+            // Weather Temperatures
+            Context c = getActivity();
+            boolean isMetric = Utility.Settings.isMetric(c);
+            mHighTempView.setText(Utility.Format.formatTemperature(c, cWeatherMaxTemp, isMetric));
+            mLowTempView.setText(Utility.Format.formatTemperature(c, cWeatherMinTemp, isMetric));
+
+            // Weather Image
+            mIconView.setImageResource(Utility.Art.getArtResourceForWeatherCondition(cWeatherCondId));
+
+            // Weather Description
+            mDescriptionView.setText(cWeatherDesc);
+
+            // Weather Details
+            mHumidityView.setText(Utility.Format.getFormattedHumidity(c, cWeatherHumidity));
+            mWindView.setText(Utility.Format.getFormattedWind(c, cWeatherWindSpeed, cWeatherWindDirection));
+            mPressureView.setText(Utility.Format.getFormattedPressure(c, cWeatherPressure));
+
+            // Sharing
+            mForecast = String.format(Locale.getDefault(), "%s - %s - %s/%s",
+                    mDateView.getText(),
+                    mDescriptionView.getText(),
+                    mHighTempView.getText(),
+                    mLowTempView.getText());
+
+            if (mShareActionProvider != null) {
+                mShareActionProvider.setShareIntent(createShareForecastIntent());
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
     }
 
     @Override
@@ -102,116 +212,5 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         } else {
             Log.d(LOG_TAG, "Share Action Provider is null?");
         }
-    }
-
-    private Intent createShareForecastIntent() {
-        return new Intent(Intent.ACTION_SEND)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
-                .setType("text/plain")
-                .putExtra(Intent.EXTRA_TEXT, mForecast.concat(FORECAST_SHARE_HASHTAG));
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Intent intent = getActivity().getIntent();
-
-        return intent != null ? new CursorLoader(
-                getActivity(),
-                intent.getData(),
-                FORECAST_COLUMNS,
-                null,
-                null,
-                null
-        ) : null;
-    }
-
-    public static class ViewHolder {
-        public final TextView txtDay;
-        public final TextView txtDate;
-        public final TextView txtHighTemp;
-        public final TextView txtLowTemp;
-        public final ImageView imgForecast;
-        public final TextView txtDescription;
-        public final TextView txtHumidity;
-        public final TextView txtWind;
-        public final TextView txtPressure;
-
-        public ViewHolder(View view) {
-            txtDay = (TextView) view.findViewById(R.id.day_textview);
-            txtDate = (TextView) view.findViewById(R.id.date_textview);
-            txtHighTemp = (TextView) view.findViewById(R.id.high_temperature_textview);
-            txtLowTemp = (TextView) view.findViewById(R.id.low_temperature_textview);
-            imgForecast = (ImageView) view.findViewById(R.id.forecast_icon);
-            txtDescription = (TextView) view.findViewById(R.id.desc_textview);
-            txtHumidity = (TextView) view.findViewById(R.id.humidity_textview);
-            txtWind = (TextView) view.findViewById(R.id.wind_textview);
-            txtPressure = (TextView) view.findViewById(R.id.pressure_textview);
-        }
-
-        public static ViewHolder getInstance(View view) {
-
-            if (view.getTag() == null) {
-                view.setTag(new ViewHolder(view));
-            }
-
-            return (ViewHolder) view.getTag();
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        View view = getView();
-
-        // Check if there's data and make sure the view is not null - who knows?
-        if (data == null || !data.moveToFirst() || view == null) return;
-
-        ViewHolder viewHolder = ViewHolder.getInstance(view);
-
-        int cWeatherCondId = data.getInt(COL_WEATHER_CONDITION_ID);
-        long cWeatherDate = data.getLong(COL_WEATHER_DATE);
-        String cWeatherDesc = data.getString(COL_WEATHER_DESC);
-        double cWeatherMaxTemp = data.getDouble(COL_WEATHER_MAX_TEMP);
-        double cWeatherMinTemp = data.getDouble(COL_WEATHER_MIN_TEMP);
-        float cWeatherHumidity =  data.getFloat(COL_WEATHER_HUMIDITY);
-        float cWeatherWindSpeed = data.getFloat(COL_WEATHER_WIND_SPEED);
-        float cWeatherWindDirection = data.getFloat(COL_WEATHER_DEGREES);
-        float cWeatherPressure = data.getFloat(COL_WEATHER_PRESSURE);
-
-        // Weather Date
-        viewHolder.txtDay.setText(Utility.getDayName(getActivity(), cWeatherDate));
-        viewHolder.txtDate.setText(Utility.getFormattedMonthDay(getActivity(), cWeatherDate));
-
-        // Weather Temperatures
-        Context c = getActivity();
-        boolean isMetric = Utility.isMetric(c);
-        viewHolder.txtHighTemp.setText(Utility.formatTemperature(c, cWeatherMaxTemp, isMetric));
-        viewHolder.txtLowTemp.setText(Utility.formatTemperature(c, cWeatherMinTemp, isMetric));
-
-        // Weather Image
-        viewHolder.imgForecast.setImageResource(ArtUtils.getArtResourceForWeatherCondition(cWeatherCondId));
-
-        // Weather Description
-        viewHolder.txtDescription.setText(cWeatherDesc);
-
-        // Weather Details
-        viewHolder.txtHumidity.setText(Utility.getFormattedHumidity(c, cWeatherHumidity));
-        viewHolder.txtWind.setText(Utility.getFormattedWind(c, cWeatherWindSpeed, cWeatherWindDirection));
-        viewHolder.txtPressure.setText(Utility.getFormattedPressure(c, cWeatherPressure));
-
-        // Sharing
-        mForecast = String.format(Locale.getDefault(), "%s - %s - %s/%s",
-                viewHolder.txtDay.getText(),
-                viewHolder.txtDescription.getText(),
-                viewHolder.txtHighTemp.getText(),
-                viewHolder.txtLowTemp.getText());
-
-        if (mShareActionProvider != null) {
-            mShareActionProvider.setShareIntent(createShareForecastIntent());
-        }
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
     }
 }

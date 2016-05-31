@@ -6,67 +6,104 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback {
 
-    private final String LOG_TAG = MainActivity.class.getSimpleName();
-    private final String FORECASTFRAGMENT_TAG = "forecast_fragment_tag";
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private static final String DETAILFRAGMENT_TAG = "DFTAG";
 
     private String mLocation;
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
-                    .commit();
+        mLocation = Utility.Settings.getPreferredLocation(this);
+
+        if (findViewById(R.id.weather_detail_container) != null) {
+            // res/layout-sw600dp
+            mTwoPane = true;
+
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a fragment transaction.
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.weather_detail_container, new DetailFragment(), DETAILFRAGMENT_TAG)
+                        .commit();
+            }
+        } else {
+            mTwoPane = false;
+
+            // Remove Action Bar shadows for Android >= 5.0
+            getSupportActionBar().setElevation(0f);
         }
 
-        mLocation = Utility.getPreferredLocation(this);
-
-        Log.i(LOG_TAG, "onCreate() called");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        String settingsLocation = Utility.getPreferredLocation(this);
+        String settingsLocation = Utility.Settings.getPreferredLocation(this);
 
-        if(settingsLocation != null && !settingsLocation.equals(mLocation)){
-            ForecastFragment ff = (ForecastFragment)getSupportFragmentManager().findFragmentByTag(FORECASTFRAGMENT_TAG);
-
-            if(ff != null){
+        if (settingsLocation != null && !settingsLocation.equals(mLocation)) {
+            ForecastFragment ff = (ForecastFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
+            if (ff != null) {
                 ff.onLocationSettingChanged();
+            }
+
+            DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+            if (df != null) {
+                df.onLocationSettingChanged(settingsLocation);
             }
 
             mLocation = settingsLocation;
         }
     }
 
+    public boolean getIsTwoPaneLayout(){
+        return mTwoPane;
+    }
+
+    //region ForecastFragment.Callback
+
+    @Override
+    public void onItemSelected(Uri contentUri) {
+        if (mTwoPane) {
+            Bundle arguments = new Bundle();
+            arguments.putParcelable(DetailFragment.DETAIL_URI, contentUri);
+
+            DetailFragment fragment = new DetailFragment();
+            fragment.setArguments(arguments);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, fragment, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, DetailActivity.class)
+                    .setData(contentUri);
+            startActivity(intent);
+        }
+    }
+
+    //endregion
+
+    //region Options Menu
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        switch (id) {
+        switch (item.getItemId()) {
             case R.id.action_settings:
                 startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 return true;
@@ -90,4 +127,6 @@ public class MainActivity extends ActionBarActivity {
             Toast.makeText(MainActivity.this, "There's no Maps app installed. ):", Toast.LENGTH_SHORT).show();
         }
     }
+
+    //endregion
 }

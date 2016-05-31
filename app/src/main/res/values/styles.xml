@@ -2,7 +2,31 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/sunshine_blue</item>
+        <item name="colorPrimaryDark">@color/sunshine_dark_blue</item>
+    </style>
+
+    <!-- Main activity theme. -->
+    <style name="ForecastTheme" parent="AppTheme">
+        <item name="actionBarStyle">@style/ActionBar.Solid.Sunshine.NoTitle</item>
+
+        <!-- Remove shadow below action bar Android < 5.0 -->
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Main activity Action Bar -->
+    <style name="ActionBar.Solid.Sunshine.NoTitle" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
+        <item name="displayOptions">useLogo|showHome</item>
+        <item name="logo">@drawable/ic_logo</item>
+    </style>
+
+    <!-- Settings activity theme. -->
+    <style name="SettingsTheme" parent="AppTheme">
+    </style>
+
+    <!-- Style for forecast listview -->
+    <style name="ForecastListStyle">
+        <item name="android:choiceMode">none</item>
     </style>
 
 </resources>

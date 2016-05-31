@@ -45,11 +45,11 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
 
     private final Context mContext;
 
+    private boolean DEBUG = true;
+
     public FetchWeatherTask(Context context) {
         mContext = context;
     }
-
-    private boolean DEBUG = true;
 
     /**
      * Helper method to handle insertion of a new location in the weather database.
@@ -71,9 +71,11 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
                 new String[]{locationSetting},
                 null);
 
-        if (locationCursor.moveToFirst()) {
+        if (locationCursor != null && locationCursor.moveToFirst()) {
             int locationIdIndex = locationCursor.getColumnIndex(WeatherContract.LocationEntry._ID);
             locationId = locationCursor.getLong(locationIdIndex);
+
+
         } else {
             // Now that the content provider is set up, inserting rows of data is pretty simple.
             // First create a ContentValues object to hold the data you want to insert.
@@ -96,7 +98,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
             locationId = ContentUris.parseId(insertedUri);
         }
 
-        locationCursor.close();
+        if (locationCursor != null) locationCursor.close();
+
         // Wait, that worked?  Yes!
         return locationId;
     }
