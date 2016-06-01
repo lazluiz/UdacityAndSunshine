@@ -1,7 +1,9 @@
 package com.example.android.sunshine.app;
 
 /**
- * Created by Sunshine-Version-2-1.01_hello_world on 12/05/2016.
+ * Created by Luiz F. Lazzarin on 12/05/2016.
+ * Email: lf.lazzarin@gmail.com
+ * Github: /luizfelippe
  */
 
 import android.content.Context;
@@ -168,6 +170,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             // Weather Image
             mIconView.setImageResource(Utility.Art.getArtResourceForWeatherCondition(cWeatherCondId));
+            mIconView.setContentDescription(cWeatherDesc);
 
             // Weather Description
             mDescriptionView.setText(cWeatherDesc);
