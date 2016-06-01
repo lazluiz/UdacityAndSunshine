@@ -28,6 +28,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.android.sunshine.app.custom.CompassView;
 import com.example.android.sunshine.app.data.WeatherContract;
 
 import java.util.Locale;
@@ -81,6 +82,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView mHumidityView;
     private TextView mWindView;
     private TextView mPressureView;
+    private CompassView mCompassView;
 
     public DetailFragment() {
         setHasOptionsMenu(true);
@@ -103,6 +105,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         mHumidityView = (TextView) rootView.findViewById(R.id.detail_humidity_textview);
         mWindView = (TextView) rootView.findViewById(R.id.detail_wind_textview);
         mPressureView = (TextView) rootView.findViewById(R.id.detail_pressure_textview);
+        mCompassView = (CompassView) rootView.findViewById(R.id.detail_compass);
 
         return rootView;
     }
@@ -179,6 +182,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             mHumidityView.setText(Utility.Format.getFormattedHumidity(c, cWeatherHumidity));
             mWindView.setText(Utility.Format.getFormattedWind(c, cWeatherWindSpeed, cWeatherWindDirection));
             mPressureView.setText(Utility.Format.getFormattedPressure(c, cWeatherPressure));
+
+            // Weather Compass
+            mCompassView.setDirection(cWeatherWindDirection);
 
             // Sharing
             mForecast = String.format(Locale.getDefault(), "%s - %s - %s/%s",

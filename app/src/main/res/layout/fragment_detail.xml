@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/layout_margin">
+        android:padding ="@dimen/layout_margin">
 
         <TextView
             android:id="@+id/detail_day_textview"
@@ -107,6 +107,12 @@
             android:layout_marginTop="4dp"
             android:fontFamily="sans-serif-condensed"
             android:textAppearance="?android:textAppearanceLarge"/>
+
+        <com.example.android.sunshine.app.custom.CompassView
+            android:id="@+id/detail_compass"
+            android:layout_width="144dp"
+            android:layout_height="144dp"
+            android:layout_marginTop="16dp"/>
 
     </LinearLayout>
 

@@ -32,6 +32,12 @@
                 android:textColor="#646464"
                 android:textSize="20sp"/>
 
+            <com.example.android.sunshine.app.custom.CompassView
+                android:id="@+id/detail_compass"
+                android:layout_width="144dp"
+                android:layout_height="144dp"
+                android:layout_marginTop="16dp"/>
+
         </LinearLayout>
 
         <!-- Main content: high, low, art, weather state -->
