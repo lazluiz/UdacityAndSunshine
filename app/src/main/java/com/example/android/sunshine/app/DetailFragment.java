@@ -25,6 +25,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -185,6 +187,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             // Weather Compass
             mCompassView.setDirection(cWeatherWindDirection);
+            mCompassView.setContentDescription(Utility.Format.getFormattedWind(c, cWeatherWindSpeed, cWeatherWindDirection));
 
             // Sharing
             mForecast = String.format(Locale.getDefault(), "%s - %s - %s/%s",
@@ -196,6 +199,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             if (mShareActionProvider != null) {
                 mShareActionProvider.setShareIntent(createShareForecastIntent());
             }
+
+
         }
     }
 
