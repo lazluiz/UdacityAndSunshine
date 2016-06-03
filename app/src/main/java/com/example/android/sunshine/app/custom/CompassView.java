@@ -11,6 +11,8 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 
 import com.example.android.sunshine.app.R;
 
@@ -32,20 +34,20 @@ public class CompassView extends View {
 
     public CompassView(Context context) {
         super(context);
-        init();
+        init(context);
     }
 
     public CompassView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context);
     }
 
     public CompassView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context);
     }
 
-    private void init() {
+    private void init(Context context) {
         mFontSize = 20;
 
         mCompassPaint = new Paint();
@@ -95,7 +97,6 @@ public class CompassView extends View {
         canvas.drawText("W", mFontSize - m, r + m, mTextPaint);
 
         // Needle
-
         canvas.drawLine(
                 w / 2,
                 h / 2,
@@ -103,27 +104,6 @@ public class CompassView extends View {
                 (float) (h / 2 - r * Math.cos(mDirection)),
                 mNeedlePaint
         );
-
-    }
-
-    private void drawArrows(Point[] point, Canvas canvas, Paint paint) {
-
-        float[] points = new float[8];
-        points[0] = point[0].x;
-        points[1] = point[0].y;
-        points[2] = point[1].x;
-        points[3] = point[1].y;
-        points[4] = point[2].x;
-        points[5] = point[2].y;
-        points[6] = point[0].x;
-        points[7] = point[0].y;
-
-        canvas.drawVertices(Canvas.VertexMode.TRIANGLES, 8, points, 0, null, 0, null, 0, null, 0, 0, paint);
-        Path path = new Path();
-        path.moveTo(point[0].x, point[0].y);
-        path.lineTo(point[1].x, point[1].y);
-        path.lineTo(point[2].x, point[2].y);
-        canvas.drawPath(path, paint);
 
     }
 }
