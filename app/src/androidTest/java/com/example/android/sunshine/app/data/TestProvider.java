@@ -29,6 +29,8 @@ import android.util.Log;
 import com.example.android.sunshine.app.data.WeatherContract.LocationEntry;
 import com.example.android.sunshine.app.data.WeatherContract.WeatherEntry;
 
+import java.util.Calendar;
+
 /*
     Note: This is not a complete set of tests of the Sunshine ContentProvider, but it does test
     that at least the basic functionality has been implemented correctly.
@@ -525,5 +527,25 @@ public class TestProvider extends AndroidTestCase {
                     cursor, bulkInsertContentValues[i]);
         }
         cursor.close();
+    }
+
+    public void testDeleteOldData() {
+        testBulkInsert();
+
+        Calendar yesterday = Calendar.getInstance();
+        yesterday.add(Calendar.DAY_OF_YEAR, -1);
+
+        long formattedYesterday = WeatherContract.normalizeDate(yesterday.getTimeInMillis());
+
+
+        int deletedRows = mContext.getContentResolver().delete(
+                WeatherContract.WeatherEntry.CONTENT_URI,
+                WeatherContract.WeatherEntry.COLUMN_DATE + " < ? ",
+                new String[]{String.valueOf(formattedYesterday)}
+        );
+
+        Log.i("DELETE", "Deleted rows: " + String.valueOf(deletedRows));
+
+        assertTrue("It should delete at least one", deletedRows > 0);
     }
 }

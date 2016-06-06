@@ -110,25 +110,9 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
             case R.id.action_settings:
                 startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 return true;
-            case R.id.action_map:
-                openPreferredLocationInMap();
-                return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void openPreferredLocationInMap() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-        String location = prefs.getString(getResources().getString(R.string.pref_location_key), getResources().getString(R.string.pref_location_default));
-
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=" + location));
-
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        } else {
-            Toast.makeText(MainActivity.this, "There's no Maps app installed. ):", Toast.LENGTH_SHORT).show();
-        }
     }
 
     //endregion

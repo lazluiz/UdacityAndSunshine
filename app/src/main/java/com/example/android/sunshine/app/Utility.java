@@ -42,7 +42,7 @@ public class Utility {
         }
     }
 
-    static class Art {
+    public static class Art {
         /**
          * Helper method to provide the icon resource id according to the weather condition id returned
          * by the OpenWeatherMap call.
@@ -114,8 +114,8 @@ public class Utility {
         }
     }
 
-    static class Format {
-        static String formatTemperature(Context context, double temperature, boolean isMetric) {
+    public static class Format {
+        public static String formatTemperature(Context context, double temperature, boolean isMetric) {
             double temp;
             String type;
             if (!isMetric) {
@@ -128,7 +128,7 @@ public class Utility {
             return context.getString(R.string.format_temperature, temp, type);
         }
 
-        static String formatDate(long dateInMillis) {
+        public static String formatDate(long dateInMillis) {
             Date date = new Date(dateInMillis);
             return DateFormat.getDateInstance().format(date);
         }

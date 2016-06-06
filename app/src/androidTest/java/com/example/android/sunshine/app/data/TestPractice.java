@@ -1,6 +1,9 @@
 package com.example.android.sunshine.app.data;
 
 import android.test.AndroidTestCase;
+import android.util.Log;
+
+import java.util.Calendar;
 
 public class TestPractice extends AndroidTestCase {
     /*
@@ -24,7 +27,7 @@ public class TestPractice extends AndroidTestCase {
 
         if (b > d) {
             fail("XX should never happen");
-        }else{
+        } else {
 
         }
     }
