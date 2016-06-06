@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "com.example.android.sunshine.app"
+        applicationId "com.zelius.android.sunshine.app"
         minSdkVersion 11
         targetSdkVersion 23
         versionCode 1

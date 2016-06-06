@@ -103,11 +103,12 @@
                 android:textAppearance="?android:textAppearanceLarge"
                 android:textColor="#646464"/>
 
-            <com.example.android.sunshine.app.custom.CompassView
+            <com.zelius.android.sunshine.app.custom.CompassView
                 android:id="@+id/detail_compass"
-                android:layout_width="144dp"
-                android:layout_height="144dp"
-                android:layout_marginTop="16dp"/>
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_marginTop="24dp"
+                android:visibility="invisible"/>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
