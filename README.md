@@ -1,4 +1,5 @@
-Sunshine
+<img src="sunshine-icon.png" align="right" height"200px" width="200px" />
+# Sunshine
 ========
 
 Sunshine is the companion Android app for the Udacity course [Developing Android Apps: Android Fundamentals](https://www.udacity.com/course/ud853).
