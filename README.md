@@ -1,5 +1,5 @@
-Sunshine
-========
+<img src="sunshine-icon.png" align="right" height"200px" width="200px" />
+# Sunshine
 
 Sunshine is the companion Android app for the Udacity course [Developing Android Apps: Android Fundamentals](https://www.udacity.com/course/ud853).
 
@@ -14,3 +14,7 @@ This is the second version of the Sunshine code. The repository has been updated
 For the original version, please go [here](https://github.com/udacity/Sunshine).
 
 A changelog for the course can be found [here](https://docs.google.com/a/knowlabs.com/document/d/193xJb_OpcNCqgquMhxPrMh05IEYFXQqt0S6-6YK8gBw/pub).
+
+# Get the APP
+
+The app can be found on the [PlayStore](https://play.google.com/store/apps/details?id=com.zelius.android.sunshine.app).
