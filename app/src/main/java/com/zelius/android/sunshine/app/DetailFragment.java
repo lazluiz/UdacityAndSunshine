@@ -72,7 +72,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @BindView(R.id.detail_icon) ImageView mIconView;
     @BindView(R.id.detail_day_textview) TextView mDayView;
-    @BindView(R.id.detail_date_textview) TextView mDateView;
     @BindView(R.id.detail_desc_textview) TextView mDescriptionView;
     @BindView(R.id.detail_high_temperature_textview) TextView mHighTempView;
     @BindView(R.id.detail_low_temperature_textview) TextView mLowTempView;
@@ -157,8 +156,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             float cWeatherPressure = data.getFloat(COL_WEATHER_PRESSURE);
 
             // Weather Date
-            mDayView.setText(Utility.Format.getDayName(getActivity(), cWeatherDate));
-            mDateView.setText(Utility.Format.getFormattedMonthDay(getActivity(), cWeatherDate));
+            mDayView.setText(String.format(getResources().getString(R.string.format_day),
+                    Utility.Format.getDayName(getActivity(), cWeatherDate),
+                    Utility.Format.getFormattedMonthDay(getActivity(), cWeatherDate))
+            );
 
             // Weather Temperatures
             Context c = getActivity();
@@ -185,7 +186,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             // Sharing
             mForecast = String.format(Locale.getDefault(), "%s - %s - %s/%s",
-                    mDateView.getText(),
+                    mDayView.getText(),
                     mDescriptionView.getText(),
                     mHighTempView.getText(),
                     mLowTempView.getText());

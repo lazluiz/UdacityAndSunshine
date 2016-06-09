@@ -126,6 +126,7 @@ public class Utility {
                 temp = temperature;
                 type = context.getString(R.string.celsius);
             }
+
             return context.getString(R.string.format_temperature, temp, type);
         }
 

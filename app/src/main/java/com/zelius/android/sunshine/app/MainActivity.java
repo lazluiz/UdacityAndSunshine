@@ -3,14 +3,15 @@ package com.zelius.android.sunshine.app;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.zelius.android.sunshine.app.sync.SunshineSyncAdapter;
 import com.zelius.android.sunshine.app.util.Utility;
 
-public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback {
+public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
@@ -40,7 +41,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
             mTwoPane = false;
 
             // Remove Action Bar shadows for Android >= 5.0
-            getSupportActionBar().setElevation(0f);
+            //getSupportActionBar().setElevation(0f);
         }
 
         SunshineSyncAdapter.initializeSyncAdapter(this);
@@ -83,6 +84,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
             fragment.setArguments(arguments);
 
             getSupportFragmentManager().beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                     .replace(R.id.weather_detail_container, fragment, DETAILFRAGMENT_TAG)
                     .commit();
         } else {
