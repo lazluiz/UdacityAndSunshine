@@ -34,8 +34,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.zelius.android.sunshine.app.adapter.ForecastAdapter;
 import com.zelius.android.sunshine.app.data.WeatherContract;
 import com.zelius.android.sunshine.app.sync.SunshineSyncAdapter;
+import com.zelius.android.sunshine.app.util.Utility;
 
 /**
  * Encapsulates fetching the forecast and displaying it as a {@link ListView} layout.
@@ -46,10 +48,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     private static final String BUNDLE_LIST_POSITION = "P";
     private static final int FORECAST_LOADER = 0;
-
-    private ForecastAdapter mForecastAdapter;
-    private ListView mListView;
-    private int mPosition = ListView.INVALID_POSITION;
 
     private static final String[] FORECAST_COLUMNS = {
             // In this case the id needs to be fully qualified with a table name, since
@@ -69,23 +67,25 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             WeatherContract.LocationEntry.COLUMN_COORD_LONG
     };
 
-    // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
-    // must change.
-    static final int COL_WEATHER_ID = 0;
-    static final int COL_WEATHER_DATE = 1;
-    static final int COL_WEATHER_DESC = 2;
-    static final int COL_WEATHER_MAX_TEMP = 3;
-    static final int COL_WEATHER_MIN_TEMP = 4;
-    static final int COL_WEATHER_CONDITION_ID = 5;
-    static final int COL_LOCATION_SETTING = 6;
-    static final int COL_COORD_LAT = 7;
-    static final int COL_COORD_LONG = 8;
+    public static final int COL_WEATHER_ID = 0;
+    public static final int COL_WEATHER_DATE = 1;
+    public static final int COL_WEATHER_DESC = 2;
+    public static final int COL_WEATHER_MAX_TEMP = 3;
+    public static final int COL_WEATHER_MIN_TEMP = 4;
+    public static final int COL_WEATHER_CONDITION_ID = 5;
+    public static final int COL_LOCATION_SETTING = 6;
+    public static final int COL_COORD_LAT = 7;
+    public static final int COL_COORD_LONG = 8;
+
+    private ForecastAdapter mForecastAdapter;
+    private ListView mListView;
+
+    private int mPosition = ListView.INVALID_POSITION;
 
     /**
      * +     * A callback interface that all activities containing this fragment must
      * +     * implement. This mechanism allows activities to be notified of item
      * +     * selections.
-     * +
      */
     public interface Callback {
         void onItemSelected(Uri contentUri);

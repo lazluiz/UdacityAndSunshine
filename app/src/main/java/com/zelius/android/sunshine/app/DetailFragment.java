@@ -30,8 +30,13 @@ import android.widget.TextView;
 
 import com.zelius.android.sunshine.app.custom.CompassView;
 import com.zelius.android.sunshine.app.data.WeatherContract;
+import com.zelius.android.sunshine.app.util.Utility;
 
 import java.util.Locale;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -39,11 +44,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private static final String LOG_TAG = DetailFragment.class.getSimpleName();
     private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
-
-    private ShareActionProvider mShareActionProvider;
-    private String mForecast = "";
-    private Uri mUri;
-
     private static final int DETAIL_LOADER = 0;
 
     private static final String[] FORECAST_COLUMNS = {
@@ -59,9 +59,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             WeatherContract.WeatherEntry.COLUMN_WEATHER_ID
     };
 
-    // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
-    // must change.
-    // Just some boilerplate code from Google
     private static final int COL_WEATHER_ID = 0;
     private static final int COL_WEATHER_DATE = 1;
     private static final int COL_WEATHER_DESC = 2;
@@ -73,16 +70,21 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final int COL_WEATHER_PRESSURE = 8;
     private static final int COL_WEATHER_CONDITION_ID = 9;
 
-    private ImageView mIconView;
-    private TextView mDateView;
-    private TextView mDayView;
-    private TextView mDescriptionView;
-    private TextView mHighTempView;
-    private TextView mLowTempView;
-    private TextView mHumidityView;
-    private TextView mWindView;
-    private TextView mPressureView;
-    private CompassView mCompassView;
+    @BindView(R.id.detail_icon) ImageView mIconView;
+    @BindView(R.id.detail_day_textview) TextView mDayView;
+    @BindView(R.id.detail_date_textview) TextView mDateView;
+    @BindView(R.id.detail_desc_textview) TextView mDescriptionView;
+    @BindView(R.id.detail_high_temperature_textview) TextView mHighTempView;
+    @BindView(R.id.detail_low_temperature_textview) TextView mLowTempView;
+    @BindView(R.id.detail_humidity_textview) TextView mHumidityView;
+    @BindView(R.id.detail_wind_textview) TextView mWindView;
+    @BindView(R.id.detail_pressure_textview) TextView mPressureView;
+    @BindView(R.id.detail_compass) CompassView mCompassView;
+
+    private Unbinder mUnbinder;
+    private ShareActionProvider mShareActionProvider;
+    private String mForecast = "";
+    private Uri mUri;
 
     public DetailFragment() {
         setHasOptionsMenu(true);
@@ -90,29 +92,26 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Bundle arguments = getArguments();
-        if (arguments != null) {
-            mUri = arguments.getParcelable(DETAIL_URI);
-        }
+        View view = inflater.inflate(R.layout.fragment_detail, container, false);
+        mUnbinder = ButterKnife.bind(this, view);
 
-        View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-        mIconView = (ImageView) rootView.findViewById(R.id.detail_icon);
-        mDayView = (TextView) rootView.findViewById(R.id.detail_day_textview);
-        mDateView = (TextView) rootView.findViewById(R.id.detail_date_textview);
-        mDescriptionView = (TextView) rootView.findViewById(R.id.detail_desc_textview);
-        mHighTempView = (TextView) rootView.findViewById(R.id.detail_high_temperature_textview);
-        mLowTempView = (TextView) rootView.findViewById(R.id.detail_low_temperature_textview);
-        mHumidityView = (TextView) rootView.findViewById(R.id.detail_humidity_textview);
-        mWindView = (TextView) rootView.findViewById(R.id.detail_wind_textview);
-        mPressureView = (TextView) rootView.findViewById(R.id.detail_pressure_textview);
-        mCompassView = (CompassView) rootView.findViewById(R.id.detail_compass);
+        return view;
+    }
 
-        return rootView;
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mUri = arguments.getParcelable(DETAIL_URI);
+        }
 
         getLoaderManager().initLoader(DETAIL_LOADER, savedInstanceState, this);
     }
@@ -127,12 +126,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
-    private Intent createShareForecastIntent() {
-        return new Intent(Intent.ACTION_SEND)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
-                .setType("text/plain")
-                .putExtra(Intent.EXTRA_TEXT, mForecast.concat(FORECAST_SHARE_HASHTAG));
-    }
+    //region Cursor Loader
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -151,6 +145,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // Check if there's data
         if (data != null && data.moveToFirst()) {
 
+            // Cursor data
             int cWeatherCondId = data.getInt(COL_WEATHER_CONDITION_ID);
             long cWeatherDate = data.getLong(COL_WEATHER_DATE);
             String cWeatherDesc = data.getString(COL_WEATHER_DESC);
@@ -198,13 +193,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             if (mShareActionProvider != null) {
                 mShareActionProvider.setShareIntent(createShareForecastIntent());
             }
-
-
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+    }
+
+    //endregion
+
+    //region Options Menu
+
+    private Intent createShareForecastIntent() {
+        return new Intent(Intent.ACTION_SEND)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
+                .setType("text/plain")
+                .putExtra(Intent.EXTRA_TEXT, mForecast.concat(FORECAST_SHARE_HASHTAG));
     }
 
     @Override
@@ -226,4 +230,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             Log.d(LOG_TAG, "Share Action Provider is null?");
         }
     }
+
+    //endregion
 }

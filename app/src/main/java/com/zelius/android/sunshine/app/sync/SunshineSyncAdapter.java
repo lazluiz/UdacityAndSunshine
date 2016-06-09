@@ -28,7 +28,7 @@ import android.util.Log;
 import com.zelius.android.sunshine.app.BuildConfig;
 import com.zelius.android.sunshine.app.MainActivity;
 import com.zelius.android.sunshine.app.R;
-import com.zelius.android.sunshine.app.Utility;
+import com.zelius.android.sunshine.app.util.Utility;
 import com.zelius.android.sunshine.app.data.WeatherContract;
 
 import org.json.JSONArray;

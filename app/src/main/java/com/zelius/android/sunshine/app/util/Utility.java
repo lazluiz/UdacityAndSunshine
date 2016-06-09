@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.zelius.android.sunshine.app;
+package com.zelius.android.sunshine.app.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.format.Time;
+
+import com.zelius.android.sunshine.app.R;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

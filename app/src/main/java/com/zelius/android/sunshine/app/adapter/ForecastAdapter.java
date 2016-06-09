@@ -1,4 +1,4 @@
-package com.zelius.android.sunshine.app;
+package com.zelius.android.sunshine.app.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -8,6 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.zelius.android.sunshine.app.ForecastFragment;
+import com.zelius.android.sunshine.app.R;
+import com.zelius.android.sunshine.app.util.Utility;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * {@link ForecastAdapter} exposes a list of weather forecasts
@@ -25,7 +32,7 @@ public class ForecastAdapter extends CursorAdapter {
         super(context, c, flags);
     }
 
-    public void setUseTodayLayout(boolean useTodayLayout){
+    public void setUseTodayLayout(boolean useTodayLayout) {
         mUseTodayLayout = useTodayLayout;
     }
 
@@ -39,22 +46,15 @@ public class ForecastAdapter extends CursorAdapter {
         return VIEW_TYPE_COUNT;
     }
 
-    /**
-     * Cache of the children views for a forecast list item.
-     */
     public static class ViewHolder {
-        public final ImageView iconView;
-        public final TextView dateView;
-        public final TextView descriptionView;
-        public final TextView highTempView;
-        public final TextView lowTempView;
+        @BindView(R.id.list_item_icon) ImageView iconView;
+        @BindView(R.id.list_item_date_textview) TextView dateView;
+        @BindView(R.id.list_item_forecast_textview) TextView descriptionView;
+        @BindView(R.id.list_item_high_textview) TextView highTempView;
+        @BindView(R.id.list_item_low_textview) TextView lowTempView;
 
         public ViewHolder(View view) {
-            iconView = (ImageView) view.findViewById(R.id.list_item_icon);
-            dateView = (TextView) view.findViewById(R.id.list_item_date_textview);
-            descriptionView = (TextView) view.findViewById(R.id.list_item_forecast_textview);
-            highTempView = (TextView) view.findViewById(R.id.list_item_high_textview);
-            lowTempView = (TextView) view.findViewById(R.id.list_item_low_textview);
+            ButterKnife.bind(this, view);
         }
     }
 
@@ -65,7 +65,7 @@ public class ForecastAdapter extends CursorAdapter {
 
         int layoutId =
                 viewType == VIEW_TYPE_FUTURE_DAY ? R.layout.list_item_forecast :
-                viewType == VIEW_TYPE_TODAY ? R.layout.list_item_forecast_today : -1;
+                        viewType == VIEW_TYPE_TODAY ? R.layout.list_item_forecast_today : -1;
 
         View view = LayoutInflater.from(context).inflate(layoutId, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
@@ -73,13 +73,11 @@ public class ForecastAdapter extends CursorAdapter {
         return view;
     }
 
-    /*
-        This is where we fill-in the views with the contents of the cursor.
-     */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
+        // Cursor values
         int cWeatherCondId = cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID);
         long cWeatherDate = cursor.getLong(ForecastFragment.COL_WEATHER_DATE);
         String cWeatherDesc = cursor.getString(ForecastFragment.COL_WEATHER_DESC);
@@ -88,9 +86,9 @@ public class ForecastAdapter extends CursorAdapter {
 
         // Weather Icon
         int viewType = getItemViewType(cursor.getPosition());
-        if(viewType == VIEW_TYPE_FUTURE_DAY){
+        if (viewType == VIEW_TYPE_FUTURE_DAY) {
             viewHolder.iconView.setImageResource(Utility.Art.getIconResourceForWeatherCondition(cWeatherCondId));
-        }else if(viewType == VIEW_TYPE_TODAY){
+        } else if (viewType == VIEW_TYPE_TODAY) {
             viewHolder.iconView.setImageResource(Utility.Art.getArtResourceForWeatherCondition(cWeatherCondId));
         }
 

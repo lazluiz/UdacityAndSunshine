@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.zelius.android.sunshine.app.sync.SunshineSyncAdapter;
+import com.zelius.android.sunshine.app.util.Utility;
 
 public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback {
 
